@@ -11,6 +11,10 @@ export function friendlyError(error: unknown, fallback = 'Something went sideway
     return 'No connection right now. Check your internet and try again.';
   }
   if (message.includes('invalid login credentials')) return 'Email or password is incorrect.';
+  if (message.includes('email not confirmed')) return 'Confirm your email before logging in.';
+  if (message.includes('email send rate limit') || message.includes('only request this after')) {
+    return 'Please wait a minute before requesting another confirmation email.';
+  }
   if (message.includes('user already registered')) return 'An account already uses that email.';
   if (message.includes('username search limit')) return 'Too many searches. Wait a minute and try again.';
   if (message.includes('password should be')) return 'Use a stronger password and try again.';

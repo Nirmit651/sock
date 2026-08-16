@@ -13,12 +13,15 @@ import { useAuth } from '@/providers/auth-provider';
 import { colors, radius, spacing } from '@/theme/tokens';
 
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn, resendConfirmation } = useAuth();
   const { created } = useLocalSearchParams<{ created?: string }>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [resendBusy, setResendBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [confirmationPending, setConfirmationPending] = useState(created === 'confirm');
 
   const submit = async () => {
     if (!email.trim() || !password) {
@@ -32,8 +35,28 @@ export default function LoginScreen() {
       router.replace('/(tabs)');
     } catch (error) {
       setSubmitError(friendlyError(error, 'Couldn’t log in. Try again.'));
+      if ((error as { message?: string }).message?.toLowerCase().includes('email not confirmed')) {
+        setConfirmationPending(true);
+      }
     } finally {
       setBusy(false);
+    }
+  };
+
+  const resend = async () => {
+    if (!email.trim()) {
+      setResendMessage('Enter the email address you used to sign up first.');
+      return;
+    }
+    setResendMessage(null);
+    setResendBusy(true);
+    try {
+      await resendConfirmation(email);
+      setResendMessage('Confirmation email sent. Check your inbox and spam folder.');
+    } catch (error) {
+      setResendMessage(friendlyError(error, 'Couldn’t resend the confirmation email. Try again.'));
+    } finally {
+      setResendBusy(false);
     }
   };
 
@@ -93,6 +116,21 @@ export default function LoginScreen() {
         />
         {submitError ? <FormMessage>{submitError}</FormMessage> : null}
         <Button label="Log in" loading={busy} disabled={!email.trim() || !password} onPress={submit} />
+        {confirmationPending ? (
+          <View style={styles.confirmation}>
+            <AppText variant="caption" color={colors.muted}>
+              Didn’t get it? Enter your signup email above and request one more link.
+            </AppText>
+            {resendMessage ? <FormMessage tone="success">{resendMessage}</FormMessage> : null}
+            <Button
+              label="Resend confirmation email"
+              tone="quiet"
+              loading={resendBusy}
+              disabled={!email.trim()}
+              onPress={resend}
+            />
+          </View>
+        ) : null}
       </View>
       <View style={styles.footer}>
         <AppText color={colors.muted}>New around here?</AppText>
@@ -118,5 +156,6 @@ const styles = StyleSheet.create({
   brand: { gap: spacing.sm, padding: spacing.xxl, paddingBottom: spacing.huge },
   mark: { width: 58, height: 58, borderRadius: radius.md, marginBottom: spacing.sm },
   form: { gap: spacing.lg, paddingHorizontal: spacing.xl },
+  confirmation: { gap: spacing.sm },
   footer: { alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.xl },
 });

@@ -63,8 +63,9 @@
     "test:db": "node ./scripts/dev.mjs --test-db",
     "export:web": "expo export --platform web --output-dir dist/verify",
     "export:all": "expo export --platform all --output-dir dist/verify",
-    "deploy:vercel": "npm run export:web && cp vercel.json dist/verify/vercel.json && npx vercel deploy dist/verify -y",
-    "deploy:vercel:prod": "npm run export:web && cp vercel.json dist/verify/vercel.json && npx vercel deploy dist/verify --prod -y",
+    "prepare:vercel": "node ./scripts/prepare-vercel.mjs",
+    "deploy:vercel": "npm run export:web && npm run prepare:vercel && cp vercel.json dist/verify/vercel.json && npx vercel deploy dist/verify -y",
+    "deploy:vercel:prod": "npm run export:web && npm run prepare:vercel && cp vercel.json dist/verify/vercel.json && npx vercel deploy dist/verify --prod -y",
     "audit:production": "npm audit --omit=dev --audit-level=high",
     "verify": "npm run lint && npm run typecheck && npm test",
     "verify:full": "npm run verify && npm run test:db && npm run export:all"

@@ -13,6 +13,7 @@ jest.mock('@/lib/notifications', () => ({
 }));
 jest.mock('@/services/auth', () => ({
   createAccount: jest.fn(),
+  resendSignupConfirmation: jest.fn(),
 }));
 jest.mock('@/lib/supabase', () => ({
   supabase: {

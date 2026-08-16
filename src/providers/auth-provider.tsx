@@ -14,7 +14,11 @@ import { AppState } from 'react-native';
 
 import { unregisterCurrentPushToken } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
-import { createAccount, type CreateAccountResult } from '@/services/auth';
+import {
+  createAccount,
+  resendSignupConfirmation,
+  type CreateAccountResult,
+} from '@/services/auth';
 
 type SignUpInput = {
   email: string;
@@ -31,6 +35,7 @@ type AuthContextValue = {
   retrySession: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (input: SignUpInput) => Promise<CreateAccountResult>;
+  resendConfirmation: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -122,6 +127,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [applySession]);
 
   const signUp = useCallback(async (input: SignUpInput) => createAccount(input), []);
+  const resendConfirmation = useCallback(
+    async (email: string) => resendSignupConfirmation(email),
+    [],
+  );
 
   const signOut = useCallback(async () => {
     if (session?.user.id) {
@@ -141,9 +150,19 @@ export function AuthProvider({ children }: PropsWithChildren) {
       retrySession,
       signIn,
       signUp,
+      resendConfirmation,
       signOut,
     }),
-    [initializationError, loading, retrySession, session, signIn, signOut, signUp],
+    [
+      initializationError,
+      loading,
+      resendConfirmation,
+      retrySession,
+      session,
+      signIn,
+      signOut,
+      signUp,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

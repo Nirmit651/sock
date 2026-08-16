@@ -4,6 +4,7 @@ import {
   configuredSupabasePublishableKey,
   configuredSupabaseUrl,
 } from '@/lib/runtime';
+import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
 
 type CreateAccountInput = {
@@ -16,6 +17,14 @@ type CreateAccountInput = {
 export type CreateAccountResult = {
   requiresEmailConfirmation: boolean;
 };
+
+export async function resendSignupConfirmation(email: string) {
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email: email.trim(),
+  });
+  if (error) throw error;
+}
 
 export async function createAccount({
   email,

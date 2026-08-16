@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-import { createAccount } from '@/services/auth';
+import { supabase } from '@/lib/supabase';
+import { createAccount, resendSignupConfirmation } from '@/services/auth';
 
 jest.mock('@/lib/runtime', () => ({
   configuredSupabaseUrl: 'https://sock.test',
@@ -9,14 +10,19 @@ jest.mock('@/lib/runtime', () => ({
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(),
 }));
+jest.mock('@/lib/supabase', () => ({
+  supabase: { auth: { resend: jest.fn() } },
+}));
 
 const mockCreateClient = createClient as jest.Mock;
 const mockSignUp = jest.fn();
+const mockResend = supabase.auth.resend as jest.Mock;
 
 describe('createAccount', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCreateClient.mockReturnValue({ auth: { signUp: mockSignUp } });
+    mockResend.mockResolvedValue({ error: null });
   });
 
   it('creates an auto-confirmed account without persisting its session', async () => {
@@ -74,5 +80,10 @@ describe('createAccount', () => {
         username: 'user_sock',
       }),
     ).rejects.toThrow('User already registered');
+  });
+
+  it('resends a confirmation link without creating another account', async () => {
+    await expect(resendSignupConfirmation(' NEW@SOCK.TEST ')).resolves.toBeUndefined();
+    expect(mockResend).toHaveBeenCalledWith({ type: 'signup', email: 'NEW@SOCK.TEST' });
   });
 });
