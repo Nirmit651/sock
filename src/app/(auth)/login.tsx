@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { useState } from 'react';
@@ -104,31 +105,31 @@ export default function LoginScreen() {
           returnKeyType="next"
           placeholder="you@school.edu"
         />
-        <View style={styles.passwordField}>
-          <TextField
-            label="Password"
-            value={password}
-            onChangeText={(value) => {
-              setPassword(value);
-              setSubmitError(null);
-            }}
-            secureTextEntry={!passwordVisible}
-            autoComplete="current-password"
-            returnKeyType="done"
-            onSubmitEditing={submit}
-            placeholder="••••••••"
-          />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={passwordVisible ? 'Hide password' : 'Show password'}
-            onPress={() => setPasswordVisible((visible) => !visible)}
-            style={({ pressed }) => [styles.passwordControl, pressed && styles.pressed]}
-          >
-            <AppText variant="caption" color={colors.orangeDark}>
-              {passwordVisible ? 'Hide password' : 'Show password'}
-            </AppText>
-          </Pressable>
-        </View>
+        <TextField
+          label="Password"
+          value={password}
+          onChangeText={(value) => {
+            setPassword(value);
+            setSubmitError(null);
+          }}
+          secureTextEntry={!passwordVisible}
+          autoComplete="current-password"
+          returnKeyType="done"
+          onSubmitEditing={submit}
+          placeholder="••••••••"
+          accessoryRight={
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={passwordVisible ? 'Hide password' : 'Show password'}
+              accessibilityHint="Toggles whether your password is visible"
+              hitSlop={8}
+              onPress={() => setPasswordVisible((visible) => !visible)}
+              style={({ pressed }) => [styles.passwordControl, pressed && styles.pressed]}
+            >
+              <Feather name={passwordVisible ? 'eye-off' : 'eye'} size={21} color={colors.muted} />
+            </Pressable>
+          }
+        />
         {submitError ? <FormMessage>{submitError}</FormMessage> : null}
         <Button label="Log in" loading={busy} disabled={!email.trim() || !password} onPress={submit} />
         <Button
@@ -182,8 +183,7 @@ const styles = StyleSheet.create({
   brand: { gap: spacing.sm, padding: spacing.xxl, paddingBottom: spacing.huge },
   mark: { width: 58, height: 58, borderRadius: radius.md, marginBottom: spacing.sm },
   form: { gap: spacing.lg, paddingHorizontal: spacing.xl },
-  passwordField: { gap: spacing.xs },
-  passwordControl: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center', paddingHorizontal: spacing.xs },
+  passwordControl: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   confirmation: { gap: spacing.sm },
   footer: { alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.xl },
   pressed: { opacity: 0.65 },
