@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(38);
+select plan(39);
 
 insert into auth.users (id, email, raw_user_meta_data, raw_app_meta_data, email_confirmed_at)
 values
@@ -45,6 +45,17 @@ values (
   'member',
   '00000000-0000-0000-0000-00000000000a'
 );
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', true);
+select set_config('request.jwt.claim.role', 'authenticated', true);
+select lives_ok(
+  $$insert into public.groups (owner_id, name)
+    values ('00000000-0000-0000-0000-00000000000a', 'Returned group')
+    returning id$$,
+  'a group owner can create and receive their new group'
+);
+reset role;
 
 update public.sock_visibility_settings
 set mode = 'all_friends'
