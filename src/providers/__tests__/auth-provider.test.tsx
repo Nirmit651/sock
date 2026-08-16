@@ -64,6 +64,8 @@ function Harness() {
             email: 'new@sock.test',
             password: 'password123',
             username: 'new_sock',
+            dateOfBirth: '2000-01-01',
+            legalAgreement: true,
           })
             .then(() => setSignUpState('signed-up'))
             .catch((error: Error) => setSignUpState(error.message));

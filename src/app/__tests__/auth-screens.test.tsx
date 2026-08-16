@@ -44,7 +44,9 @@ describe('authentication screens', () => {
     await fireEvent.changeText(view.getByLabelText('Username'), 'new_sock');
     await fireEvent.changeText(view.getByLabelText('Display name (optional)'), 'New Sock');
     await fireEvent.changeText(view.getByLabelText('Email'), 'new@sock.test');
+    await fireEvent.changeText(view.getByLabelText('Date of birth'), '01 / 01 / 2000');
     await fireEvent.changeText(view.getByLabelText('Password'), 'password123');
+    await fireEvent.press(view.getByLabelText('I agree to the Terms of Service and acknowledge the Privacy Policy'));
     await fireEvent.press(view.getByLabelText('Create account'));
 
     await waitFor(() =>
@@ -63,13 +65,25 @@ describe('authentication screens', () => {
 
     await fireEvent.changeText(view.getByLabelText('Username'), 'new_sock');
     await fireEvent.changeText(view.getByLabelText('Email'), 'new@sock.test');
+    await fireEvent.changeText(view.getByLabelText('Date of birth'), '01 / 01 / 2000');
     await fireEvent.changeText(view.getByLabelText('Password'), 'password123');
+    await fireEvent.press(view.getByLabelText('I agree to the Terms of Service and acknowledge the Privacy Policy'));
     await fireEvent.press(view.getByLabelText('Create account'));
 
     await waitFor(() =>
       expect(view.getByText(/can’t make another account with this email/i)).toBeTruthy(),
     );
     expect(mockReplace).not.toHaveBeenCalled();
+    await view.unmount();
+  });
+
+  it('requires the explicit legal agreement before enabling account creation', async () => {
+    mockUseAuth.mockReturnValue({ signUp: jest.fn() });
+    const view = await render(<SignupScreen />);
+
+    expect(view.getByLabelText('Create account').props.accessibilityState.disabled).toBe(true);
+    await fireEvent.press(view.getByLabelText('I agree to the Terms of Service and acknowledge the Privacy Policy'));
+    expect(view.getByLabelText('Create account').props.accessibilityState.disabled).toBe(false);
     await view.unmount();
   });
 

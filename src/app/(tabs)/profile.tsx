@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
+import { Link, router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 
@@ -35,7 +35,7 @@ const options: { mode: VisibilityMode; title: string; body: string; icon: 'users
 ];
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, deleteAccount } = useAuth();
   const userId = user?.id ?? '';
   const profile = useProfile(userId);
   const groups = useGroups(userId);
@@ -119,6 +119,25 @@ export default function ProfileScreen() {
         ? current.filter((groupId) => groupId !== id)
         : [...current, id];
     });
+  };
+
+  const confirmDeleteAccount = () => {
+    Alert.alert(
+      'Delete your account?',
+      'This permanently deletes your profile, friends, groups, sock history, preferences, device tokens, and avatar. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete account',
+          style: 'destructive',
+          onPress: () => {
+            void deleteAccount().catch((error) =>
+              Alert.alert('Account not deleted', friendlyError(error, 'We could not delete your account. Try again.')),
+            );
+          },
+        },
+      ],
+    );
   };
 
   if (profile.isError || visibility.isError) {
@@ -305,6 +324,9 @@ export default function ProfileScreen() {
             })
           }
         />
+        <Link href={'/terms' as Href} accessibilityRole="link" style={styles.legalLink}>Terms of Service</Link>
+        <Link href={'/privacy' as Href} accessibilityRole="link" style={styles.legalLink}>Privacy Policy</Link>
+        <Button label="Delete account" tone="danger" onPress={confirmDeleteAccount} />
       </View>
 
       <Button
@@ -348,4 +370,5 @@ const styles = StyleSheet.create({
   groupRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   setting: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: spacing.lg, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   notice: { textAlign: 'center', paddingHorizontal: spacing.lg },
+  legalLink: { color: colors.orangeDark, textDecorationLine: 'underline' },
 });

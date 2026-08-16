@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import {
   createAccount,
   completePasswordReset,
+  deleteCurrentAccount,
   requestPasswordReset,
   resendSignupConfirmation,
   verifyPasswordResetCode,
@@ -29,6 +30,8 @@ type SignUpInput = {
   password: string;
   username: string;
   displayName?: string;
+  dateOfBirth: string;
+  legalAgreement: true;
 };
 
 type AuthContextValue = {
@@ -43,6 +46,7 @@ type AuthContextValue = {
   requestPasswordReset: (email: string) => Promise<void>;
   verifyPasswordResetCode: (email: string, code: string) => Promise<PasswordRecoverySession>;
   completePasswordReset: (recoverySession: PasswordRecoverySession, password: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -149,6 +153,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
     [],
   );
 
+  const deleteAccount = useCallback(async () => {
+    await deleteCurrentAccount();
+    // Local sign-out clears an already-issued browser/native session even
+    // though the server-side account has just been removed.
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } finally {
+      queryClient.clear();
+      applySession(null);
+    }
+  }, [applySession, queryClient]);
+
   const signOut = useCallback(async () => {
     if (session?.user.id) {
       await unregisterCurrentPushToken(session.user.id);
@@ -171,6 +187,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       requestPasswordReset: requestReset,
       verifyPasswordResetCode: verifyResetCode,
       completePasswordReset: completeReset,
+      deleteAccount,
       signOut,
     }),
     [
@@ -180,6 +197,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       requestReset,
       verifyResetCode,
       completeReset,
+      deleteAccount,
       retrySession,
       session,
       signIn,

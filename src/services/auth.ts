@@ -5,6 +5,7 @@ import {
   configuredSupabaseUrl,
 } from '@/lib/runtime';
 import { supabase } from '@/lib/supabase';
+import { legalDocuments } from '@/content/legal';
 import type { Database } from '@/types/database';
 
 type CreateAccountInput = {
@@ -12,6 +13,8 @@ type CreateAccountInput = {
   password: string;
   username: string;
   displayName?: string;
+  dateOfBirth: string;
+  legalAgreement: true;
 };
 
 export type CreateAccountResult = {
@@ -52,6 +55,8 @@ export async function createAccount({
   password,
   username,
   displayName,
+  dateOfBirth,
+  legalAgreement,
 }: CreateAccountInput) {
   // Account creation deliberately uses a non-persisting client. When hosted
   // Auth requires email confirmation, Supabase returns a user with no session;
@@ -64,6 +69,10 @@ export async function createAccount({
       data: {
         username: username.trim().toLowerCase(),
         display_name: displayName?.trim() || undefined,
+        date_of_birth: dateOfBirth,
+        legal_agreement: legalAgreement,
+        terms_version: legalDocuments.termsVersion,
+        privacy_policy_version: legalDocuments.privacyPolicyVersion,
       },
     },
   });
@@ -83,6 +92,14 @@ export async function createAccount({
 export async function requestPasswordReset(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
   if (error) throw error;
+}
+
+export async function deleteCurrentAccount() {
+  const { data, error } = await supabase.functions.invoke<{ deleted?: boolean }>('delete-account', {
+    body: {},
+  });
+  if (error) throw error;
+  if (!data?.deleted) throw new Error('Sock could not confirm that the account was deleted.');
 }
 
 export async function verifyPasswordResetCode(email: string, code: string): Promise<PasswordRecoverySession> {

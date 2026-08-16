@@ -12,6 +12,13 @@ export function friendlyError(error: unknown, fallback = 'Something went sideway
   }
   if (message.includes('invalid login credentials')) return 'Email or password is incorrect.';
   if (message.includes('email not confirmed')) return 'Confirm your email before logging in.';
+  if (message.includes('not eligible to create a sock account')) {
+    return 'You aren’t eligible to create a Sock account.';
+  }
+  if (message.includes('accept the terms of service and privacy policy')) {
+    return 'Review and accept the Terms of Service and Privacy Policy to create an account.';
+  }
+  if (message.includes('valid date of birth')) return 'Enter a valid date of birth as MM / DD / YYYY.';
   if (
     candidate.status === 429 ||
     message.includes('rate limit') ||

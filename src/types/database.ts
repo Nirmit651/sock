@@ -290,29 +290,47 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_eligibility_confirmed_at: string | null
+          age_eligibility_version: string | null
           avatar_path: string | null
           created_at: string
           display_name: string | null
           group_stats_opt_in: boolean
           id: string
+          privacy_acknowledged_at: string | null
+          privacy_policy_version: string | null
+          terms_accepted_at: string | null
+          terms_version: string | null
           updated_at: string
           username: string
         }
         Insert: {
+          age_eligibility_confirmed_at?: string | null
+          age_eligibility_version?: string | null
           avatar_path?: string | null
           created_at?: string
           display_name?: string | null
           group_stats_opt_in?: boolean
           id: string
+          privacy_acknowledged_at?: string | null
+          privacy_policy_version?: string | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           updated_at?: string
           username: string
         }
         Update: {
+          age_eligibility_confirmed_at?: string | null
+          age_eligibility_version?: string | null
           avatar_path?: string | null
           created_at?: string
           display_name?: string | null
           group_stats_opt_in?: boolean
           id?: string
+          privacy_acknowledged_at?: string | null
+          privacy_policy_version?: string | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           updated_at?: string
           username?: string
         }
