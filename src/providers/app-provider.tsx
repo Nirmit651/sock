@@ -12,7 +12,9 @@ import { AppState, Platform } from 'react-native';
 
 import { AuthProvider } from '@/providers/auth-provider';
 
-void SplashScreen.preventAutoHideAsync();
+if (Platform.OS !== 'web') {
+  void SplashScreen.preventAutoHideAsync();
+}
 
 export function AppProvider({ children }: PropsWithChildren) {
   const [queryClient] = useState(
@@ -32,7 +34,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   });
 
   useEffect(() => {
-    if (loaded) void SplashScreen.hideAsync();
+    if (Platform.OS !== 'web' && loaded) void SplashScreen.hideAsync();
   }, [loaded]);
 
   useEffect(() => {
@@ -43,7 +45,10 @@ export function AppProvider({ children }: PropsWithChildren) {
     return () => subscription.remove();
   }, []);
 
-  if (!loaded) return null;
+  // A static web export must never wait behind font loading. If a font request
+  // is slow or unavailable, React Native Web falls back to the system stack
+  // and the login screen remains usable instead of rendering a blank page.
+  if (Platform.OS !== 'web' && !loaded) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
