@@ -1,6 +1,6 @@
 # Sock
 
-Sock is a privacy-first mobile status app for trusted friends and groups. A user can put a sock up, share that live state with the audience they chose, and later see private or aggregated usage statistics without exposing exact session history to other users.
+Sock is a mobile status app for trusted friends and groups. A user can put a sock up, share that live state with the audience they chose, and later see private or aggregated usage statistics without exposing exact session history to other users.
 
 The MVP is built with Expo SDK 57, React Native, TypeScript, Expo Router, TanStack Query, and Supabase Auth, Postgres, Realtime, Storage, and Edge Functions.
 
