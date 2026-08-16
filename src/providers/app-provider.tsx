@@ -3,8 +3,8 @@ import {
   SpaceGrotesk_500Medium,
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
-  useFonts,
 } from '@expo-google-fonts/space-grotesk';
+import { useFonts } from 'expo-font';
 import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type PropsWithChildren } from 'react';
