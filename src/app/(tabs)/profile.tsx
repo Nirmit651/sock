@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 
@@ -288,6 +289,23 @@ export default function ProfileScreen() {
           {pushWarning}
         </AppText>
       ) : null}
+
+      <View style={styles.section}>
+        <SectionHeading title="Account" />
+        <AppText variant="caption" color={colors.muted}>
+          Send a 10-minute verification code before changing your password.
+        </AppText>
+        <Button
+          label="Reset password"
+          tone="secondary"
+          onPress={() =>
+            router.push({
+              pathname: '/reset-password',
+              params: { email: user?.email ?? '', from: 'settings' },
+            })
+          }
+        />
+      </View>
 
       <Button
         label="Log out"

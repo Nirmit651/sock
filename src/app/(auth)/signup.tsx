@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ export default function SignupScreen() {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -95,19 +96,31 @@ export default function SignupScreen() {
           error={errors.email}
           placeholder="you@school.edu"
         />
-        <TextField
-          label="Password"
-          value={password}
-          onChangeText={(value) => {
-            setPassword(value);
-            setErrors((current) => ({ ...current, password: '' }));
-            setSubmitError(null);
-          }}
-          secureTextEntry
-          autoComplete="new-password"
-          error={errors.password}
-          placeholder="At least 8 characters"
-        />
+        <View style={styles.passwordField}>
+          <TextField
+            label="Password"
+            value={password}
+            onChangeText={(value) => {
+              setPassword(value);
+              setErrors((current) => ({ ...current, password: '' }));
+              setSubmitError(null);
+            }}
+            secureTextEntry={!passwordVisible}
+            autoComplete="new-password"
+            error={errors.password}
+            placeholder="At least 8 characters"
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={passwordVisible ? 'Hide password' : 'Show password'}
+            onPress={() => setPasswordVisible((visible) => !visible)}
+            style={({ pressed }) => [styles.passwordControl, pressed && styles.pressed]}
+          >
+            <AppText variant="caption" color={colors.orangeDark}>
+              {passwordVisible ? 'Hide password' : 'Show password'}
+            </AppText>
+          </Pressable>
+        </View>
         {submitError ? <FormMessage>{submitError}</FormMessage> : null}
         <Button label="Create account" loading={busy} onPress={submit} />
         <Button label="Back to log in" tone="quiet" onPress={() => router.back()} />
@@ -119,4 +132,7 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   header: { gap: spacing.md, marginTop: spacing.huge },
   form: { gap: spacing.lg },
+  passwordField: { gap: spacing.xs },
+  passwordControl: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center', paddingHorizontal: spacing.xs },
+  pressed: { opacity: 0.65 },
 });

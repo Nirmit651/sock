@@ -16,7 +16,11 @@ import { unregisterCurrentPushToken } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
 import {
   createAccount,
+  completePasswordReset,
+  requestPasswordReset,
   resendSignupConfirmation,
+  verifyPasswordResetCode,
+  type PasswordRecoverySession,
   type CreateAccountResult,
 } from '@/services/auth';
 
@@ -36,6 +40,9 @@ type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (input: SignUpInput) => Promise<CreateAccountResult>;
   resendConfirmation: (email: string) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  verifyPasswordResetCode: (email: string, code: string) => Promise<PasswordRecoverySession>;
+  completePasswordReset: (recoverySession: PasswordRecoverySession, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -131,6 +138,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
     async (email: string) => resendSignupConfirmation(email),
     [],
   );
+  const requestReset = useCallback(async (email: string) => requestPasswordReset(email), []);
+  const verifyResetCode = useCallback(
+    async (email: string, code: string) => verifyPasswordResetCode(email, code),
+    [],
+  );
+  const completeReset = useCallback(
+    async (recoverySession: PasswordRecoverySession, password: string) =>
+      completePasswordReset(recoverySession, password),
+    [],
+  );
 
   const signOut = useCallback(async () => {
     if (session?.user.id) {
@@ -151,12 +168,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
       signIn,
       signUp,
       resendConfirmation,
+      requestPasswordReset: requestReset,
+      verifyPasswordResetCode: verifyResetCode,
+      completePasswordReset: completeReset,
       signOut,
     }),
     [
       initializationError,
       loading,
       resendConfirmation,
+      requestReset,
+      verifyResetCode,
+      completeReset,
       retrySession,
       session,
       signIn,

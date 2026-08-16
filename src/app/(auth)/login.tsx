@@ -1,7 +1,7 @@
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
@@ -14,9 +14,10 @@ import { colors, radius, spacing } from '@/theme/tokens';
 
 export default function LoginScreen() {
   const { signIn, resendConfirmation } = useAuth();
-  const { created } = useLocalSearchParams<{ created?: string }>();
+  const { created, reset } = useLocalSearchParams<{ created?: string; reset?: string }>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [resendBusy, setResendBusy] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -87,6 +88,8 @@ export default function LoginScreen() {
           </FormMessage>
         ) : created === '1' ? (
           <FormMessage tone="success">Account created. Log in to continue.</FormMessage>
+        ) : reset === '1' ? (
+          <FormMessage tone="success">Password reset. Log in with your new password.</FormMessage>
         ) : null}
         <TextField
           label="College email"
@@ -101,21 +104,44 @@ export default function LoginScreen() {
           returnKeyType="next"
           placeholder="you@school.edu"
         />
-        <TextField
-          label="Password"
-          value={password}
-          onChangeText={(value) => {
-            setPassword(value);
-            setSubmitError(null);
-          }}
-          secureTextEntry
-          autoComplete="current-password"
-          returnKeyType="done"
-          onSubmitEditing={submit}
-          placeholder="••••••••"
-        />
+        <View style={styles.passwordField}>
+          <TextField
+            label="Password"
+            value={password}
+            onChangeText={(value) => {
+              setPassword(value);
+              setSubmitError(null);
+            }}
+            secureTextEntry={!passwordVisible}
+            autoComplete="current-password"
+            returnKeyType="done"
+            onSubmitEditing={submit}
+            placeholder="••••••••"
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={passwordVisible ? 'Hide password' : 'Show password'}
+            onPress={() => setPasswordVisible((visible) => !visible)}
+            style={({ pressed }) => [styles.passwordControl, pressed && styles.pressed]}
+          >
+            <AppText variant="caption" color={colors.orangeDark}>
+              {passwordVisible ? 'Hide password' : 'Show password'}
+            </AppText>
+          </Pressable>
+        </View>
         {submitError ? <FormMessage>{submitError}</FormMessage> : null}
         <Button label="Log in" loading={busy} disabled={!email.trim() || !password} onPress={submit} />
+        <Button
+          label="Forgot password?"
+          tone="quiet"
+          disabled={busy}
+          onPress={() =>
+            router.push({
+              pathname: '/reset-password',
+              params: email.trim() ? { email: email.trim() } : {},
+            })
+          }
+        />
         {confirmationPending ? (
           <View style={styles.confirmation}>
             <AppText variant="caption" color={colors.muted}>
@@ -156,6 +182,9 @@ const styles = StyleSheet.create({
   brand: { gap: spacing.sm, padding: spacing.xxl, paddingBottom: spacing.huge },
   mark: { width: 58, height: 58, borderRadius: radius.md, marginBottom: spacing.sm },
   form: { gap: spacing.lg, paddingHorizontal: spacing.xl },
+  passwordField: { gap: spacing.xs },
+  passwordControl: { alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center', paddingHorizontal: spacing.xs },
   confirmation: { gap: spacing.sm },
   footer: { alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.xl },
+  pressed: { opacity: 0.65 },
 });

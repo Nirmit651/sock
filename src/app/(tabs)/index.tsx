@@ -1,8 +1,10 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Alert, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { SockHero } from '@/components/sock-hero';
+import { TutorialModal } from '@/components/tutorial-modal';
 import { AppText } from '@/components/ui/app-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -32,6 +34,7 @@ export default function HomeScreen() {
   const groups = useGroups(userId);
   const connected = useSockRealtime(userId);
   const toggle = useSockMutation(userId, activeSession.data?.id);
+  const [tutorialVisible, setTutorialVisible] = useState(false);
   const refreshing = [profile, activeSession, activeFriends, groups].some((query) => query.isRefetching);
 
   const greeting = (() => {
@@ -67,13 +70,23 @@ export default function HomeScreen() {
           </AppText>
           <AppText variant="title">Sock</AppText>
         </View>
-        {profile.data ? (
-          <ProfileAvatar
-            username={profile.data.username}
-            avatarPath={profile.data.avatar_path}
-            size={48}
-          />
-        ) : null}
+        <View style={styles.headerActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Take Tutorial"
+            onPress={() => setTutorialVisible(true)}
+            style={({ pressed }) => [styles.tutorialButton, pressed && styles.pressed]}
+          >
+            <AppText variant="caption" color={colors.ink}>Take Tutorial</AppText>
+          </Pressable>
+          {profile.data ? (
+            <ProfileAvatar
+              username={profile.data.username}
+              avatarPath={profile.data.avatar_path}
+              size={48}
+            />
+          ) : null}
+        </View>
       </View>
 
       {!connected ? (
@@ -166,12 +179,15 @@ export default function HomeScreen() {
           )}
         </View>
       </FadeIn>
+      <TutorialModal visible={tutorialVisible} onClose={() => setTutorialVisible(false)} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  tutorialButton: { minHeight: 38, justifyContent: 'center', paddingHorizontal: spacing.md, borderRadius: radius.pill, backgroundColor: colors.paper },
   offline: { backgroundColor: '#F8DED6', padding: spacing.md, borderRadius: radius.md },
   section: { gap: spacing.lg },
   avatarRail: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.lg },
@@ -189,4 +205,5 @@ const styles = StyleSheet.create({
     borderColor: colors.cream,
   },
   personName: { width: 68, textAlign: 'center' },
+  pressed: { opacity: 0.65 },
 });

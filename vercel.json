@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run export:web && npm run prepare:vercel",
+  "outputDirectory": "dist/verify",
   "cleanUrls": true,
   "headers": [
     {
